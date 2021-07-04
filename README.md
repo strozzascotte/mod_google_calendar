@@ -2,6 +2,8 @@
 
 Joomla 3.x module which gets the events from a google calendar and shows the events in a list or in a calendar view.
 
+Live Demo (list and calendar view): <https://inciudades.cuaad.udg.mx>
+
 ## Credits
 
 This project is forked from dneukirchen's project <https://github.com/dneukirchen/mod_google_calendar>
