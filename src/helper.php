@@ -53,7 +53,6 @@ class ModGoogleCalendarHelper {
 			'orderBy'    => 'startTime',
 			'maxResults' => $maxEvents,
 		);
-
 		$events = $this->getEvents($options);
 
 		return $this->prepareEvents($events);
@@ -68,6 +67,34 @@ class ModGoogleCalendarHelper {
 	 */
 	public static function duration($event)
 	{
+		// Event starts and ends in the same day
+		if ($event->startDate->format('Y-m-d', true) == $event->endDate->format('Y-m-d', true)) {
+			$dateText = $event->startDate->format('j M Y', true);
+
+		// Event starts and ends in the same month
+		} elseif ($event->startDate->format('Y-m', true) == $event->endDate->format('Y-m', true)) {
+			$dateText = JText::_('MOD_GOOGLE_CALENDAR_FROM_DAY') . ' ' . $event->startDate->format('j', true) . ' ' . JText::_('MOD_GOOGLE_CALENDAR_TO_DAY') . ' ' . $event->endDate->format('j M Y', true);
+
+		// Event starts and ends in the same year			
+		} elseif ($event->startDate->format('Y', true) == $event->endDate->format('Y', true)) {
+			$dateText  = JText::_('MOD_GOOGLE_CALENDAR_FROM_DAY') . ' ' . $event->startDate->format('j M', true) . ' ' . JText::_('MOD_GOOGLE_CALENDAR_TO_DAY') . ' ' . $event->endDate->format('j M Y', true);
+
+		// Event ends in a different year
+		} else {
+			$dateText = JText::_('MOD_GOOGLE_CALENDAR_FROM_DAY') . ' ' . $event->startDate->format('j M Y', true) . ' ' . JText::_('MOD_GOOGLE_CALENDAR_TO_DAY') . ' ' . $event->endDate->format('j M Y', true);
+		}
+
+		if (!isset($event->start->dateTime)) {
+		//Use original date regardless for timezione
+			return $dateText;
+
+		} else {
+		// Use JHtml::Date to convert from UTM to server timezone
+			$timeText = ' - ' . $event->startDate->format('H:i', true) . ' ' . JText::_('MOD_GOOGLE_CALENDAR_TO_TIME') . ' ' . $event->endDate->format('H:i', true);
+			return $dateText . $timeText;
+
+		}
+/*
 		$startDateFormat = isset($event->start->dateTime) ? 'd.m.Y H:i' : 'd.m.Y';
 		$endDateFormat   = isset($event->end->dateTime) ? 'd.m.Y H:i' : 'd.m.Y';
 
@@ -82,6 +109,7 @@ class ModGoogleCalendarHelper {
 		}
 
 		return $event->startDate->format($startDateFormat, true) . ' - ' . $event->endDate->format($endDateFormat, true);
+*/
 	}
 
 	/**
@@ -148,8 +176,14 @@ class ModGoogleCalendarHelper {
 	 */
 	protected function prepareEvent($event)
 	{
+		// Set allDay property TRUE is a strat time is not specified.
+		$event->allDay = !isset($event->start->dateTime);
 		$event->startDate = $this->unifyDate($event->start);
 		$event->endDate   = $this->unifyDate($event->end);
+		if ($event->allDay) {
+			$event->endDate->modify('-1 min');
+		}
+		$event->duration = $this->duration($event);
 
 		return $event;
 	}
@@ -163,7 +197,10 @@ class ModGoogleCalendarHelper {
 	 */
 	protected function unifyDate($date)
 	{
-		$timeZone = (isset($date->timezone)) ? $date->timezone : null;
+		// Assume the timezone is the same as server if not else specified in the event.
+		// TODO: Get the calendar default timezone from Google Calendar API
+		$timeZone = (isset($date->timezone)) ? $date->timezone : new DateTimeZone(JFactory::getConfig()->get('offset'));
+;
 
 		if (isset($date->dateTime))
 		{

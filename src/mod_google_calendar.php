@@ -15,15 +15,21 @@ try
 	$helper = new ModGoogleCalendarHelper($params);
 
 	// Setup joomla cache
-	$cache = JFactory::getCache();
+	$cache = JFactory::getCache('mod_google_calendar');
 	$cache->setCaching(true);
-	$cache->setLifeTime($params->get('api_cache_time', 60));
+	$cache->setLifeTime((int) $params->get('api_cache_time', 60) / 60);
 
 	// Get the next events
 	$events = $cache->call(
 		array($helper, 'nextEvents'),
-		(int) $params->get('max_list_events', 5)
+		(int) $params->get('max_list_events', 5),
+		$module->id
 	);
+
+	// Add stylesheet
+	$document = JFactory::getDocument();
+	$document->addStyleSheet('modules/mod_google_calendar/css/mod_google_calendar.css');
+	$document->addScript('modules/mod_google_calendar/lib/jquery.dotdotdot.js');
 
 	// Get the Layout
 	require JModuleHelper::getLayoutPath('mod_google_calendar', $params->get('layout', 'default'));
