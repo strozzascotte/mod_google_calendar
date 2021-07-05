@@ -9,14 +9,13 @@
 	<authorUrl>www.rheinsurfen.de</authorUrl>
 	<version>1.1.2</version>
 	<description>MOD_GOOGLE_CALENDAR_DESCRIPTION</description>
-	<updateservers>
-		<server type="extension" name="Google Calendar Module" priority="1">https://raw.githubusercontent.com/dneukirchen/mod_google_calendar/master/updates/mod_google_calendar.xml</server>
-	</updateservers>
 	<files>
 		<filename module="mod_google_calendar">mod_google_calendar.php</filename>
 		<folder>language</folder>
 		<folder>media</folder>
 		<folder>tmpl</folder>
+		<folder>css</folder>
+		<folder>lib</folder>
 		<filename>helper.php</filename>
 	</files>
 	<config>

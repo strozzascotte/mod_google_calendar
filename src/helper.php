@@ -84,7 +84,7 @@ class ModGoogleCalendarHelper {
 			$dateText = JText::_('MOD_GOOGLE_CALENDAR_FROM_DAY') . ' ' . $event->startDate->format('j M Y', true) . ' ' . JText::_('MOD_GOOGLE_CALENDAR_TO_DAY') . ' ' . $event->endDate->format('j M Y', true);
 		}
 
-		if (!isset($event->start->dateTime)) {
+		if ($event->allDay) {
 		//Use original date regardless for timezione
 			return $dateText;
 
@@ -137,6 +137,7 @@ class ModGoogleCalendarHelper {
 
 		$response = $http->get($url);
 		$data     = json_decode($response->body);
+		\JFactory::getApplication()->enqueueMessage("[ModGoogleCalendarHelper::getEvents] Google response: $response->body", 'debug');
 
 		if ($data && isset($data->items))
 		{

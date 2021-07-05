@@ -6,6 +6,17 @@
 
 defined('_JEXEC') or die; 
 
+if (!function_exists('Html_Calendar')) {
+	function Html_Calendar($date, $style) {
+		?>
+		<div class='event-calendar' style="<?php echo $style; ?>">
+			<div class='event-month'><?php echo strtoupper($date->format('M', true)); ?></div>
+			<div class='event-day'><?php echo $date->format('j', true); ?></div>
+			<div class='event-dayname'><?php echo $date->format('l', true); ?></div>
+		</div>
+		<?php
+	}
+}
 if (count($events) !=0 ) : ?>
 	<div class="mod-google-calendar">
 		<ul class="next-events">
@@ -13,19 +24,13 @@ if (count($events) !=0 ) : ?>
 				<li class="event" itemscope itemtype="http://schema.org/Event">
 					<meta itemprop="startDate" content="<?php echo JDate::getInstance($event->startDate)->toISO8601(true); ?>">
 					<meta itemprop="endDate" content="<?php echo JDate::getInstance($event->endDate)->toISO8601(true); ?>">
-					<div class='event-calendar' style="z-index: 5;">
-						<div class='event-month'><?php echo strtoupper($event->startDate->format('M')); ?></div>
-						<div class='event-day'><?php echo $event->startDate->format('d'); ?></div>
-						<div class='event-dayname'><?php echo $event->startDate->format('l'); ?></div>
-					</div>
-					<?php if($event->startDate->format('Y-m-d') != $event->endDate->format('Y-m-d')) : ?>
-						<div class='event-calendar' style="z-index: 3; position: absolute; left: 8px; top: 8px;">
-							<div class='event-month'><?php echo strtoupper($event->endDate->format('M')); ?></div>
-							<div class='event-day'><?php echo $event->endDate->format('d'); ?></div>
-							<div class='event-dayname'><?php echo $event->endDate->format('l'); ?></div>
-						</div>
-					<?php endif; ?>
+					<?php 
+						Html_Calendar($event->startDate, "z-index: 5;");
 
+						if($event->startDate->format('Y-m-d', true) != $event->endDate->format('Y-m-d', true)) {
+							Html_Calendar($event->endDate, "z-index: 3; position: absolute; left: 8px; top: 8px;");
+						}
+					?>	
 					<div class='event-info'>
 						<?php if($params->get('show_link', true)) { ?>
 							<a class='event-title' href="<?php echo $event->htmlLink; ?>" target="_blank">
