@@ -37,6 +37,7 @@ class ModGoogleCalendarHelper {
 	{
 		$this->apiKey     = $params->get('api_key', null);
 		$this->calendarId = $params->get('calendar_id', null);
+		$this->timeZone   = null;
 	}
 
 	/**
@@ -137,10 +138,11 @@ class ModGoogleCalendarHelper {
 
 		$response = $http->get($url);
 		$data     = json_decode($response->body);
-		\JFactory::getApplication()->enqueueMessage("[ModGoogleCalendarHelper::getEvents] Google response: $response->body", 'debug');
+		//\JFactory::getApplication()->enqueueMessage("[ModGoogleCalendarHelper::getEvents] Google response: $response->body", 'debug');
 
 		if ($data && isset($data->items))
 		{
+			$this->timeZone = $data->timeZone;
 			return $data->items;
 		}
 		elseif ($data)
@@ -198,10 +200,7 @@ class ModGoogleCalendarHelper {
 	 */
 	protected function unifyDate($date)
 	{
-		// Assume the timezone is the same as server if not else specified in the event.
-		// TODO: Get the calendar default timezone from Google Calendar API
-		$timeZone = (isset($date->timezone)) ? $date->timezone : new DateTimeZone(JFactory::getConfig()->get('offset'));
-;
+		$timeZone = (isset($date->timezone)) ? $date->timezone : $this->timeZone;
 
 		if (isset($date->dateTime))
 		{
